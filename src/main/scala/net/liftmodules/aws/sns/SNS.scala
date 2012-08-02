@@ -1,32 +1,29 @@
 package net.liftmodules.aws.sns
 
-import java.net.InetAddress
-
-import net.liftweb.actor.LiftActor
-import net.liftweb.common.Loggable
-import net.liftweb.http.rest.RestHelper
-import net.liftweb.http.LiftRules
-import net.liftweb.http.OkResponse
-import net.liftweb.json.JsonAST.JValue
-import net.liftweb.json.parse
-import net.liftweb.util.Helpers.tryo
-import net.liftweb.common.Box
-import net.liftweb.util.Schedule
-import net.liftweb.json.JString
-
 import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.services.sns.AmazonSNSClient
 import com.amazonaws.services.sns.model.ConfirmSubscriptionRequest
 import com.amazonaws.services.sns.model.PublishRequest
 import com.amazonaws.services.sns.model.SubscribeRequest
 import com.amazonaws.services.sns.model.UnsubscribeRequest
-import com.amazonaws.services.sns.AmazonSNSClient
+
+import net.liftweb.actor.LiftActor
+import net.liftweb.common.Box.box2Option
+import net.liftweb.common.Loggable
+import net.liftweb.http.LiftRules
+import net.liftweb.http.LiftRulesMocker.toLiftRules
+import net.liftweb.http.OkResponse
+import net.liftweb.http.rest.RestHelper
+import net.liftweb.json.JString
+import net.liftweb.json.parse
+import net.liftweb.util.Helpers.tryo
+import net.liftweb.util.Schedule
 
 import SNS.HandlerFunction
 
 
 sealed trait SNSMsg
 case class Subscribe() extends SNSMsg
-case class PostBootSubscribe() extends SNSMsg
 case class Publish(msg:String) extends SNSMsg
 
 object Protocol extends Enumeration("http","https") {
@@ -88,12 +85,9 @@ case class SNS(config:SNSConfig)(handler: HandlerFunction) extends RestHelper wi
   })
   
   def messageHandler = {
-    case PostBootSubscribe()  =>
-        logger.info("boot complete, subscribing.")      
-        subscribe
     case Subscribe() if LiftRules.doneBoot =>
      logger.info("sleep for a bit before subscribing")      
-      Schedule.perform(this, PostBootSubscribe(), 10000L)
+     subscribe
     case Subscribe()  =>
      logger.info("wait until we have finished booting.")      
       Schedule.perform(this, Subscribe(), 5000L)//have a nap and try again.
