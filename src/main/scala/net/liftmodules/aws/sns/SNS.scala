@@ -102,7 +102,7 @@ case class SNS(config:SNSConfig)(handler: HandlerFunction) extends RestHelper wi
   }
   
   private[this] def subscribe = { 
-      logger.info("Subscribing to endpoint %s - %s %s %s".format(ep))
+      logger.info("Subscribing to endpoint %s".format(ep))
       client.subscribe(new SubscribeRequest().withTopicArn(config.arn).withProtocol("http").withEndpoint(ep))  
   }
   
