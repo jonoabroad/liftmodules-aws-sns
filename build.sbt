@@ -4,7 +4,9 @@ version := "2.5-SNAPSHOT-0.0.3"
 
 organization := "net.liftmodules"
  
-scalaVersion := "2.9.2"
+scalaVersion := "2.9.2" 
+
+crossScalaVersions := Seq("2.9.1","2.9.2")
  
 resolvers += "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"
 
